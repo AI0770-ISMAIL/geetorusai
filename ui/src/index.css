@@ -2630,6 +2630,9 @@ span.geetorus-mention-chip[data-mention-kind="external-object"] {
 :root {
   --sz-execution-blocker-inline: calc(var(--spacing) * 4);
   --sz-execution-blocker-block: calc(var(--spacing) * 2);
+  --sz-execution-blocker-field-gap: calc(var(--spacing) * 1);
+  --sz-execution-blocker-section-space: calc(var(--spacing) * 3);
+  --sz-execution-blocker-control-height: calc(var(--spacing) * 9);
   /* Ten single-line repository rows, including the gaps between them. */
   --sz-github-repository-list: calc(10lh + 9 * var(--spacing) * 2);
   --sz-320px: 320px; /* Extracted from ui/src/components/ActiveAgentsPanel.tsx (h-[320px]). */

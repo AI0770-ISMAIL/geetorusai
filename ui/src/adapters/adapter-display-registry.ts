@@ -104,6 +104,11 @@ const adapterDisplayMap: Record<string, AdapterDisplayInfo> = {
     icon: Moon,
     recommended: true,
   },
+  lm_studio_local: {
+    label: "LM Studio",
+    description: "Run local models through LM Studio",
+    icon: Cpu,
+  },
   hermes_gateway: {
     label: "Hermes Gateway",
     description: "Remote Hermes API server",

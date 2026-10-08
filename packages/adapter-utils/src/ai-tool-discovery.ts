@@ -332,7 +332,8 @@ export async function discoverCompleteHostEnvironment(customEnv?: Record<string,
   for (const toolDef of EXTENDED_KNOWN_TOOLS) {
     const binaryPath = resolveBinaryPath(toolDef.binaryName);
     const isAvailable = Boolean(binaryPath);
-    const version = binaryPath ? resolveVersion(binaryPath, toolDef.versionFlag) : null;
+    // Never execute IDE binaries: on Linux some (e.g. a Cursor AppImage) launch the GUI instead of printing a version.
+    const version = binaryPath && toolDef.category !== "ai_ide" ? resolveVersion(binaryPath, toolDef.versionFlag) : null;
     const detectedEnvVars = toolDef.envKeys.filter((k) => Boolean(env[k]?.trim()));
     const existingConfigPath = toolDef.configPaths(homeDir).find((p) => fs.default.existsSync(p)) ?? null;
 

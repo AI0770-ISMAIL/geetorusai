@@ -212,7 +212,7 @@ export async function testEnvironment(
 
     const configuredModel = asString(config.model, DEFAULT_OPENAI_COMPATIBLE_LOCAL_MODEL).trim();
 
-    if (canRunProbe && configuredModel) {
+    if (canRunProbe && configuredModel && !asBoolean(config.skipHelloProbe, false)) {
       const extraArgs = (() => {
         const fromExtraArgs = asStringArray(config.extraArgs);
         if (fromExtraArgs.length > 0) return fromExtraArgs;
@@ -221,14 +221,14 @@ export async function testEnvironment(
       const variant = asString(config.variant, "").trim();
 
       const args = ["run", "--format", "json"];
-      if (asBoolean(config.dangerouslySkipPermissions, true)) {
-        args.push("--auto");
-      }
+      // Permissions are supplied by prepareOpenAICompatibleRuntimeConfig.
+      // OpenCode 1.2+ no longer accepts the legacy `--auto` run flag.
       if (preparedRuntimeConfig.modelFlag) {
         args.push("--model", preparedRuntimeConfig.modelFlag);
       }
       if (variant) args.push("--variant", variant);
       if (extraArgs.length > 0) args.push(...extraArgs);
+      args.push("Respond with hello.");
 
       const helloProbeTimeoutSec = Math.max(
         1,
@@ -246,7 +246,6 @@ export async function testEnvironment(
             env: runtimeEnv,
             timeoutSec: helloProbeTimeoutSec,
             graceSec: 5,
-            stdin: "Respond with hello.",
             onLog: async () => {},
           },
         );
@@ -276,6 +275,14 @@ export async function testEnvironment(
             message: "The configured model was not found by the provider.",
             ...(detail ? { detail } : {}),
             hint: "Check that the model name exists on your provider.",
+          });
+        } else if (/(?:n_keep:\s*\d+\s*>=\s*n_ctx:\s*\d+|context length)/i.test(authEvidence)) {
+          checks.push({
+            code: "openai_compatible_hello_probe_context_too_small",
+            level: "error",
+            message: "The model context window is too small for an agent run.",
+            ...(detail ? { detail } : {}),
+            hint: "Reload the model with a context length of at least 32768 tokens, then retry the test.",
           });
         } else if (OPENAI_COMPATIBLE_AUTH_REQUIRED_RE.test(authEvidence)) {
           checks.push({

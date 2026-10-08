@@ -529,9 +529,9 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
     const buildArgs = (resumeSessionId: string | null) => {
       const args = ["run", "--format", "json"];
       if (printLogs) args.push("--print-logs");
-      if (asBoolean(config.dangerouslySkipPermissions, true)) {
-        args.push("--auto");
-      }
+      // Current OpenCode releases apply unattended permissions through the
+      // generated runtime config. The former `--auto` flag was removed and now
+      // makes `opencode run` exit after printing command help.
       if (resumeSessionId) args.push("--session", resumeSessionId);
       if (preparedRuntimeConfig.modelFlag) {
         args.push("--model", preparedRuntimeConfig.modelFlag);
@@ -543,6 +543,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
 
     const runAttempt = async (resumeSessionId: string | null) => {
       const args = buildArgs(resumeSessionId);
+      const invocationArgs = [...args, prompt];
       if (onMeta) {
         await onMeta({
           adapterType: "openai_compatible_local",
@@ -557,10 +558,9 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
         });
       }
 
-      const proc = await runAdapterExecutionTargetProcess(runId, runtimeExecutionTarget, command, args, {
+      const proc = await runAdapterExecutionTargetProcess(runId, runtimeExecutionTarget, command, invocationArgs, {
         cwd,
         env: preparedRuntimeConfig.env,
-        stdin: prompt,
         timeoutSec,
         graceSec,
         onSpawn,

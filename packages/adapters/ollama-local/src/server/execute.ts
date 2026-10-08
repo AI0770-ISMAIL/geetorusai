@@ -19,10 +19,16 @@ export async function execute(
     : "";
   const directPrompt = asString(ctx.context.prompt, "");
   const prompt = wakePrompt || directPrompt || "Respond with hello.";
-  const timeoutSec = asNumber(config.timeoutSec, 300);
+  const timeoutSec = Math.max(0, asNumber(config.timeoutSec, 300));
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutSec * 1000);
+  let timeoutFired = false;
+  const timeout = timeoutSec > 0
+    ? setTimeout(() => {
+        timeoutFired = true;
+        controller.abort();
+      }, timeoutSec * 1000)
+    : null;
 
   let fullOutput = "";
 
@@ -91,8 +97,6 @@ export async function execute(
       }
     }
 
-    clearTimeout(timeout);
-
     // Auto-post output comment to issue thread and update disposition if running on an issue
     const issueId = asString(ctx.context.issueId, asString(ctx.context.taskId, ""));
     const geetorusApiUrl = process.env.GEETORUS_API_URL || "http://127.0.0.1:3100";
@@ -146,15 +150,16 @@ export async function execute(
       provider: "ollama",
     };
   } catch (err: unknown) {
-    clearTimeout(timeout);
     const message = err instanceof Error ? err.message : String(err);
     return {
       exitCode: 1,
       signal: null,
-      timedOut: controller.signal.aborted,
+      timedOut: timeoutFired,
       errorMessage: `Ollama execution error: ${message}`,
       model,
       provider: "ollama",
     };
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
 }

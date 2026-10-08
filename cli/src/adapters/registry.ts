@@ -6,6 +6,7 @@ import { printCursorCloudEvent } from "@geetorusai/adapter-cursor-cloud/cli";
 import { printGeminiStreamEvent } from "@geetorusai/adapter-gemini-local/cli";
 import { printGrokStreamEvent } from "@geetorusai/adapter-grok-local/cli";
 import { printKimiStreamEvent } from "@geetorusai/adapter-kimi-local/cli";
+import { printLmStudioStreamEvent } from "@geetorusai/adapter-lm-studio-local/cli";
 import { formatStdoutEvent as printHermesGatewayStreamEvent } from "@geetorusai/hermes-geetorus-adapter/gateway/cli";
 import { printHermesStreamEvent } from "@geetorusai/hermes-geetorus-adapter/cli";
 import { printOpenCodeStreamEvent } from "@geetorusai/adapter-opencode-local/cli";
@@ -65,6 +66,11 @@ const kimiLocalCLIAdapter: CLIAdapterModule = {
   formatStdoutEvent: printKimiStreamEvent,
 };
 
+const lmStudioLocalCLIAdapter: CLIAdapterModule = {
+  type: "lm_studio_local",
+  formatStdoutEvent: printLmStudioStreamEvent,
+};
+
 const hermesGatewayCLIAdapter: CLIAdapterModule = {
   type: "hermes_gateway",
   formatStdoutEvent: printHermesGatewayStreamEvent,
@@ -92,6 +98,7 @@ const adaptersByType = new Map<string, CLIAdapterModule>(
     geminiLocalCLIAdapter,
     grokLocalCLIAdapter,
     kimiLocalCLIAdapter,
+    lmStudioLocalCLIAdapter,
     hermesGatewayCLIAdapter,
     hermesLocalCLIAdapter,
     openclawGatewayCLIAdapter,
