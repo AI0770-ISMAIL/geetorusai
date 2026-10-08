@@ -32,9 +32,6 @@
   <a href="#-07-development"><strong>[ DEV ]</strong></a>
 </p>
 
-</div>
-
----
 
 ### // 00. MANIFESTO
 
